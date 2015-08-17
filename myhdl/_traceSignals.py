@@ -111,10 +111,7 @@ class _TraceSignalsClass(object):
                 backup = vcdpath + '.' + str(path.getmtime(vcdpath))
                 shutil.copyfile(vcdpath, backup)
                 os.remove(vcdpath)
-
-
             vcdfile = open(vcdpath, 'w')
-
             _simulator._tracing = 1
             _simulator._tf = vcdfile
             _writeVcdHeader(vcdfile, self.timescale)
@@ -122,10 +119,10 @@ class _TraceSignalsClass(object):
 
             #bfm
             verilogTBpath = name + "_bfm.v"
-            if path.exists(vcdpath):
-                backup = vcdpath + '.' + str(path.getmtime(vcdpath))
-                shutil.copyfile(vcdpath, backup)
-                os.remove(vcdpath)
+            if path.exists(verilogTBpath):
+                backup = verilogTBpath + '.' + str(path.getmtime(verilogTBpath))
+                shutil.copyfile(verilogTBpath, backup)
+                os.remove(verilogTBpath)
             
             verilogTBfile = open(verilogTBpath, 'w')
             _simulator._tbf = verilogTBfile
@@ -217,7 +214,7 @@ def _writeVcdSigs(f, hierarchy, tracelists):
             if not s._tracing:
                 s._tracing = 1
                 s._code = next(namegen)
-                s._name = n
+                #s._name = n
                 siglist.append(s)
             w = s._nrbits
             # use real for enum strings
@@ -318,9 +315,10 @@ class RecursiveVisitor(ast.NodeVisitor):
         """ visit a Assign node and visits it recursively"""
         if isinstance(node.value,ast.Call):
             if isinstance(node.value.func,ast.Name):
-                if node.value.func.id not in ['Signal','bool','always','delay']:
-                    print (node.targets[0].id)
-                    self._db.append([
+                if node.value.func.id not in ['Signal','bool','always','delay','True','False']:
+                    if isinstance(node.value.args[0],ast.Name):
+                        print (node.targets[0].id)
+                        self._db.append([
                                    node.targets[0].id,
                                    node.value.func.id,
                                    [arg.id for arg in node.value.args]

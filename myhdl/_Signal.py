@@ -113,7 +113,7 @@ class _Signal(object):
                  '_setNextVal', '_copyVal2Next', '_printVcd', 
                  '_driven' ,'_read', '_name', '_used', '_inList',
                  '_waiter', 'toVHDL', 'toVerilog', '_slicesigs',
-                 '_numeric'
+                 '_numeric','_printTB',
                 )
 
 
@@ -163,6 +163,7 @@ class _Signal(object):
         self._posedgeWaiters = _PosedgeWaiterList(self)
         self._negedgeWaiters = _NegedgeWaiterList(self)
         self._code = ""
+        self._printTB = None
         self._slicesigs = []
         self._tracing = 0
         _signals.append(self)
@@ -307,24 +308,48 @@ class _Signal(object):
     # vcd print methods
     def _printVcdStr(self):
         print("s%s %s" % (str(self._val), self._code), file=sim._tf)
+        if hasattr(self, '_printTB'):
+            if self._printTB:
+                print("  %s = %s;"%(self._name,str(self._val)),file=sim.tbf)
         
     def _printVcdHex(self):
         if self._val is None:
             print("sz %s" % self._code, file=sim._tf)
+            if hasattr(self, '_printTB'):
+                if self._printTB:
+                    print("  %s = 1'bz;"%self._name, file=sim._tbf)
         else:
             print("s%s %s" % (hex(self._val), self._code), file=sim._tf)
+            if hasattr(self, '_printTB'):
+                if self._printTB:
+                    print("  %s = 1'b%i;"%(self._name,self._val), file=sim._tbf)
 
     def _printVcdBit(self):
         if self._val is None:
             print("z%s" % self._code, file=sim._tf)
+            if hasattr(self, '_printTB'):
+                if self._printTB:
+                    print("  %s = 1'bz;"%self._name, file=sim._tbf)
         else:
             print("%d%s" % (self._val, self._code), file=sim._tf)
+            if hasattr(self, '_printTB'):
+                if self._printTB:
+                    print("  %s = 1'b%d;"%(self._name,self._val), file=sim._tbf)
 
     def _printVcdVec(self):
         if self._val is None:
             print("b%s %s" % ('z'*self._nrbits, self._code), file=sim._tf)
+            if hasattr(self, '_printTB'):
+                if self._printTB:
+                    print("  %s = %d'b%s;"%(self._name,
+                                            self._nrbits,'z'*self._nrbits), file=sim._tbf)
+
         else:
             print("b%s %s" % (bin(self._val, self._nrbits), self._code), file=sim._tf)
+            if hasattr(self, '_printTB'):
+                if self._printTB:
+                    print("  %s = %d'b%s;"%(self._name,
+                                            self._nrbits,bin(self._val)), file=sim._tbf)
 
     ### use call interface for shadow signals ###
     def __call__(self, left, right=None):

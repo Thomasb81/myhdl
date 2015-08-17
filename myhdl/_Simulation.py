@@ -82,6 +82,10 @@ class Simulation(object):
         if _simulator._tracing:
             _simulator._tracing = 0
             _simulator._tf.close()
+            # close testbench file
+            print("end",file=_simulator._tbf)
+            print("endmodule",file=_simulator._tbf)
+            _simulator._tbf.close() 
         # clean up for potential new run with same signals
         for s in _signals:
             s._clear()
@@ -162,6 +166,7 @@ class Simulation(object):
                     t = _simulator._time = _futureEvents[0][0]
                     if tracing:
                         print("#%s" % t, file=tracefile)
+                        print("  #%s" % t, file=_simulator._tbf)
                     if cosim:
                         cosim._put(t)
                     while _futureEvents:

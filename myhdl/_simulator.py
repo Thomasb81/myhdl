@@ -32,6 +32,7 @@ _time = 0
 _cosim = 0
 _tracing = 0
 _tf = None
+_tbf = None # verilog_tb file
 
 def now():
     """ Return the current simulation time """
